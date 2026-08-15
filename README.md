@@ -28,7 +28,9 @@ archive; Kernel Lens is a discovery and interpretation layer on top of it.
 Version 0.3 development release. Topic and vendor curation, deterministic
 product-impact mapping, patch revision intelligence, explicit review evidence,
 integration-path records, search, evidence-linked AI summaries, and
-daily/weekly digests are implemented.
+daily/weekly digests are implemented. A weekly analysis pipeline can turn the
+strongest digest evidence into a private AI-assisted article draft for human
+publication.
 
 ## Repository layout
 
@@ -38,7 +40,7 @@ functions/       Pages Functions API (/api/topics, /api/search) — must live at
                   project root alongside wrangler.jsonc for Cloudflare Pages to find it
 packages/        Shared libraries (db, lore-client, mail-parser, thread-builder,
                   classifier, search, ai, ui, shared)
-workers/         Scheduled/queue Workers (collector, indexer, summarizer, digest)
+workers/         Scheduled/queue Workers (collector, indexer, summarizer, digest, blog)
 migrations/      D1 SQL migrations
 scripts/         Operational scripts (seed-topics, rebuild-fts, backfill, ...)
 ```
@@ -54,7 +56,7 @@ pnpm install
 # Web app
 pnpm --filter @lkmlens/web dev
 
-# Validate scheduled summary/digest Workers
+# Validate scheduled summary/digest/blog Workers
 pnpm workers:typecheck
 
 # D1 and curation indexes (local)
@@ -64,17 +66,43 @@ pnpm db:seed:impact:local
 pnpm impact:compute:local
 ```
 
-Scheduled Workers live in `workers/summarizer` and `workers/digest`. Apply all
+Scheduled Workers live in `workers/summarizer`, `workers/digest`, and
+`workers/blog`. Apply all
 D1 migrations before deploying them; the summarizer uses Gemini 3.1 Flash-Lite,
 a configurable daily request budget, and processes at most five pending/stale
-threads per hourly run.
+threads per hourly run. The blog Worker reads only a published weekly digest,
+uses either Gemini (`google-gemini`) or Grok (`xai-grok`), and writes no more
+than one private draft for each ISO week.
+
+Set `BLOG_AI_PROVIDER`, `BLOG_AI_MODEL`, and `BLOG_LANGUAGE` in
+`workers/blog/wrangler.jsonc`, then install the matching paid API key as a
+Worker secret:
+
+```bash
+pnpm --filter @lkmlens/blog exec wrangler secret put BLOG_AI_API_KEY --config wrangler.jsonc
+```
+
+Review and publish a generated draft explicitly:
+
+```bash
+pnpm blog:preview:remote -- --week 2026-W33
+pnpm blog:publish:remote -- --week 2026-W33
+```
+
+Only published posts are exposed by `/api/blog`, `/blog`, and `/rss/blog.xml`.
+
+The FTS index is contentless and rebuildable: it maps `message_search.rowid`
+to `messages.id`, indexes the subject plus the first 1 KiB of each message
+body, and keeps canonical message content only in `messages`. Incremental
+collection inserts only missing FTS rows; use `scripts/rebuild-fts.ts` when a
+full index rebuild is intentionally required.
 
 ## Deployment
 
 Pull requests run the test, type-check, and web build checks. Pushes to `main`
 run the same verification and then apply D1 migrations, synchronize the default
-topic and impact rules, recompute vendor/product signals, deploy both scheduled Workers, and deploy the Pages
-application through `.github/workflows/deploy.yml`.
+topic and impact rules, recompute vendor/product signals, deploy the scheduled
+Workers, and deploy the Pages application through `.github/workflows/deploy.yml`.
 
 The workflow requires these GitHub Actions repository secrets:
 
@@ -85,6 +113,11 @@ The workflow requires these GitHub Actions repository secrets:
 `GEMINI_API_KEY` is uploaded as an encrypted secret of the
 `lkmlens-summarizer` Worker. It must not be added to `wrangler.jsonc`, source
 files, or frontend environment variables.
+
+`BLOG_AI_API_KEY` is likewise uploaded only to `lkmlens-weekly-blog` with the
+Wrangler command above. Its provider must match `BLOG_AI_PROVIDER`. Once
+installed in Cloudflare, the secret remains attached to the Worker across
+deployments and does not need to be duplicated in GitHub Actions.
 
 ## License
 

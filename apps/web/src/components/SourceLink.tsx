@@ -8,16 +8,19 @@ export function SourceLink({
   href,
   children = "View source",
   className = "",
+  title,
 }: {
   href: string;
   children?: ReactNode;
   className?: string;
+  title?: string;
 }) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noreferrer"
+      title={title}
       className={`focus-ring inline-flex items-center gap-1 text-accent underline decoration-accent/35 underline-offset-[3px] transition-colors hover:decoration-accent ${className}`}
     >
       {children}

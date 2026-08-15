@@ -9,6 +9,7 @@ export const onRequestGet: PagesFunction<{ PUBLIC_SITE_URL?: string }> = async (
     "/topics",
     "/vendors",
     "/digests",
+    "/blog",
     "/about",
     "/about/methodology",
     "/support",

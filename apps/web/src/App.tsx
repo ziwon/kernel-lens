@@ -13,6 +13,8 @@ import Digests from "./pages/Digests.tsx";
 import Digest from "./pages/Digest.tsx";
 import ChannelIndex from "./pages/ChannelIndex.tsx";
 import PatchFeed from "./pages/PatchFeed.tsx";
+import Blog from "./pages/Blog.tsx";
+import BlogPost from "./pages/BlogPost.tsx";
 
 export default function App() {
   return (
@@ -28,6 +30,8 @@ export default function App() {
         <Route path="threads/:id" element={<Thread />} />
         <Route path="digests" element={<Digests />} />
         <Route path="digests/:period/:key" element={<Digest />} />
+        <Route path="blog" element={<Blog />} />
+        <Route path="blog/:slug" element={<BlogPost />} />
         <Route path="about" element={<About />} />
         <Route path="about/methodology" element={<Methodology />} />
         <Route path="privacy" element={<Privacy />} />

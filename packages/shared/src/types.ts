@@ -275,3 +275,58 @@ export interface Digest {
   generatedAt: string;
   publishedAt: string | null;
 }
+
+export type BlogPostStatus = "draft" | "published" | "archived";
+export type BlogPostLanguage = "en" | "ko";
+
+/** One evidence-linked unit of prose in a generated weekly article. */
+export interface BlogPostParagraph {
+  text: string;
+  sourceIds: string[];
+}
+
+export interface BlogPostSection {
+  heading: string;
+  paragraphs: BlogPostParagraph[];
+}
+
+export interface BlogPostContent {
+  dek: string;
+  lead: BlogPostParagraph;
+  sections: BlogPostSection[];
+  watchItems: BlogPostParagraph[];
+}
+
+/** Canonical sources are supplied by the application, never invented by AI. */
+export interface BlogPostSource {
+  sourceId: string;
+  threadId: number;
+  subject: string;
+  sourceUrl: string;
+  evidenceUrls: string[];
+}
+
+export interface BlogPostListItem {
+  id: number;
+  periodKey: string;
+  slug: string;
+  language: BlogPostLanguage;
+  title: string;
+  dek: string;
+  sourceThreadIds: number[];
+  publishedAt: string | null;
+}
+
+export interface BlogPost extends BlogPostListItem {
+  content: BlogPostContent;
+  sources: BlogPostSource[];
+  sourceDigestId: number;
+  provider: string;
+  model: string;
+  promptVersion: string;
+  inputTokens: number;
+  outputTokens: number;
+  status: BlogPostStatus;
+  generatedAt: string;
+  updatedAt: string;
+}

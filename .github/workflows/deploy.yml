@@ -100,7 +100,7 @@ jobs:
         run: |
           pnpm --filter @lkmlens/summarizer exec wrangler deploy --config wrangler.jsonc
           if [ -n "$GEMINI_API_KEY" ]; then
-            echo "$GEMINI_API_KEY" | pnpm --filter @lkmlens/summarizer exec wrangler secret put GEMINI_API_KEY --config wrangler.jsonc
+            printf '%s' "$GEMINI_API_KEY" | pnpm --filter @lkmlens/summarizer exec wrangler secret put GEMINI_API_KEY --config wrangler.jsonc
           fi
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -109,6 +109,12 @@ jobs:
 
       - name: Deploy digest Worker
         run: pnpm --filter @lkmlens/digest exec wrangler deploy --config wrangler.jsonc
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Deploy weekly blog Worker
+        run: pnpm --filter @lkmlens/blog exec wrangler deploy --config wrangler.jsonc
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

@@ -8,6 +8,7 @@ const primary = [
   { to: "/topics", label: "Topics" },
   { to: "/vendors", label: "Vendors" },
   { to: "/digests", label: "Digests" },
+  { to: "/blog", label: "Analysis" },
 ];
 
 const secondary = [

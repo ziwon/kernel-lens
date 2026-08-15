@@ -23,7 +23,11 @@
     "db:seed:impact:remote": "tsx scripts/seed-impact-rules.ts --remote",
     "impact:compute:local": "tsx scripts/compute-impact.ts --local",
     "impact:compute:remote": "tsx scripts/compute-impact.ts --remote",
-    "workers:typecheck": "pnpm --filter @lkmlens/summarizer typecheck && pnpm --filter @lkmlens/digest typecheck",
+    "blog:preview:local": "tsx scripts/manage-blog-post.ts preview --local",
+    "blog:preview:remote": "tsx scripts/manage-blog-post.ts preview --remote",
+    "blog:publish:local": "tsx scripts/manage-blog-post.ts publish --local",
+    "blog:publish:remote": "tsx scripts/manage-blog-post.ts publish --remote",
+    "workers:typecheck": "pnpm --filter @lkmlens/summarizer typecheck && pnpm --filter @lkmlens/digest typecheck && pnpm --filter @lkmlens/blog typecheck",
     "pages:deploy": "pnpm --filter @lkmlens/web build && wrangler pages deploy apps/web/dist --project-name=lkmlens"
   },
   "devDependencies": {

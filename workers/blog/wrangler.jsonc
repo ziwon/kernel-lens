@@ -1,0 +1,31 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "lkmlens-weekly-blog",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-20",
+  "compatibility_flags": ["nodejs_compat"],
+  "triggers": { "crons": ["37 1 * * *"] },
+  "secrets": {
+    "required": ["BLOG_AI_API_KEY"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "lkmlens",
+      "database_id": "8fa88e30-59ce-470d-9798-d97786deaa77",
+      "migrations_dir": "../../migrations"
+    }
+  ],
+  "vars": {
+    "BLOG_AI_PROVIDER": "xai-grok",
+    "BLOG_AI_MODEL": "grok-4.6",
+    "BLOG_AI_DAILY_REQUEST_LIMIT": "1",
+    "BLOG_REGENERATE_PERIOD": "",
+    "BLOG_LANGUAGE": "en"
+  },
+  "observability": {
+    "enabled": true,
+    "logs": { "head_sampling_rate": 1 },
+    "traces": { "enabled": true, "head_sampling_rate": 0.05 }
+  }
+}
