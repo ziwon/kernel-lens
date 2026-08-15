@@ -21,6 +21,7 @@ worker-configuration.d.ts
 
 # Logs
 *.log
+*.cpuprofile
 npm-debug.log*
 pnpm-debug.log*
 
