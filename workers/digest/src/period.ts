@@ -21,9 +21,10 @@ export function dailyWindow(now: Date): DigestWindow {
   return { periodType: "daily", periodKey: key, title: `Daily digest — ${key}`, startInclusive: start.toISOString(), endExclusive: end.toISOString() };
 }
 
-export function weeklyWindow(now: Date): DigestWindow | null {
-  if (now.getUTCDay() !== 1) return null;
-  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+export function weeklyWindow(now: Date): DigestWindow {
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const daysSinceMonday = (today.getUTCDay() + 6) % 7;
+  const end = new Date(today.getTime() - daysSinceMonday * DAY_MS);
   const start = new Date(end.getTime() - 7 * DAY_MS);
   const thursday = new Date(start.getTime() + 3 * DAY_MS);
   const yearStart = new Date(Date.UTC(thursday.getUTCFullYear(), 0, 1));

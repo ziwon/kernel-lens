@@ -1,5 +1,5 @@
 import { composeDigest, stripClaimMarkers } from "@lkmlens/ai";
-import { listDigestCandidates, upsertDigest } from "@lkmlens/db";
+import { getDigest, listDigestCandidates, upsertDigest } from "@lkmlens/db";
 import type { SummaryContent } from "@lkmlens/shared";
 import { dailyWindow, weeklyWindow, type DigestWindow } from "./period.js";
 
@@ -34,7 +34,12 @@ async function publishWindow(env: Env, window: DigestWindow): Promise<void> {
 async function publishDigests(env: Env, now: Date): Promise<void> {
   await publishWindow(env, dailyWindow(now));
   const weekly = weeklyWindow(now);
-  if (weekly) await publishWindow(env, weekly);
+  const existingWeekly = await getDigest(env.DB, "weekly", weekly.periodKey);
+  if (existingWeekly) {
+    console.log(JSON.stringify({ event: "digest_skipped_existing", period: weekly.periodKey }));
+  } else {
+    await publishWindow(env, weekly);
+  }
 }
 
 export default {
