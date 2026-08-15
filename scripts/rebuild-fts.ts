@@ -13,13 +13,13 @@
 import { execD1File, parseD1Target } from "./lib/d1.js";
 
 const SQL = `
-DELETE FROM message_search;
+INSERT INTO message_search(message_search) VALUES('delete-all');
 
-INSERT INTO message_search (message_id, subject, body_text, author_name, mailing_list, topic_names)
+INSERT INTO message_search (rowid, subject, body_text, author_name, mailing_list, topic_names)
 SELECT
-  m.message_id,
+  m.id,
   m.subject,
-  m.body_text,
+  substr(m.body_text, 1, 1024),
   m.author_name,
   m.mailing_list,
   (

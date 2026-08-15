@@ -83,9 +83,8 @@ export async function searchMessages(
     params.push(parsed.topic);
   }
 
-  // A query with only structural filters (no MATCH) still needs a FROM
-  // clause that includes the FTS table for the snippet()/bm25() calls,
-  // but must not require a match — fall back to ranking by recency.
+  // A query with only structural filters (no MATCH) still uses the FTS rowid
+  // set, but must not require a match — fall back to ranking by recency.
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
   const orderClause = matchExpr ? "ORDER BY rank ASC" : "ORDER BY m.posted_at DESC";
 
@@ -94,7 +93,9 @@ export async function searchMessages(
       m.message_id AS messageId,
       m.thread_id AS threadId,
       m.subject AS subject,
-      snippet(message_search, -1, '<mark>', '</mark>', '…', 12) AS snippet,
+      replace(replace(replace(
+        COALESCE(NULLIF(trim(substr(m.body_text, 1, 240)), ''), m.subject),
+        '&', '&amp;'), '<', '&lt;'), '>', '&gt;') AS snippet,
       m.author_name AS authorName,
       m.mailing_list AS mailingList,
       m.posted_at AS postedAt,
@@ -108,7 +109,7 @@ export async function searchMessages(
          WHERE tt.thread_id = m.thread_id) AS topicNames,
       ${matchExpr ? "bm25(message_search)" : "0"} AS rank
     FROM message_search
-    JOIN messages m ON m.message_id = message_search.message_id
+    JOIN messages m ON m.id = message_search.rowid
     LEFT JOIN threads t ON t.id = m.thread_id
     ${whereClause}
     ${orderClause}

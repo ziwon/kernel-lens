@@ -205,12 +205,12 @@ ON CONFLICT(thread_id, topic_id) DO UPDATE SET
 WHERE thread_topics.is_manual = 0;`;
 }
 
-const REBUILD_FTS_SQL = `
-DELETE FROM message_search;
-INSERT INTO message_search (message_id, subject, body_text, author_name, mailing_list, topic_names)
-SELECT m.message_id, m.subject, m.body_text, m.author_name, m.mailing_list,
+const SYNC_FTS_SQL = `
+INSERT INTO message_search (rowid, subject, body_text, author_name, mailing_list, topic_names)
+SELECT m.id, m.subject, substr(m.body_text, 1, 1024), m.author_name, m.mailing_list,
   (SELECT group_concat(tp.name, ', ') FROM thread_topics tt JOIN topics tp ON tp.id = tt.topic_id WHERE tt.thread_id = m.thread_id)
-FROM messages m;`;
+FROM messages m
+WHERE NOT EXISTS (SELECT 1 FROM message_search WHERE rowid = m.id);`;
 
 interface CheckpointRow {
   cursor: string | null;
@@ -401,7 +401,7 @@ ON CONFLICT(source_key) DO UPDATE SET
   last_message_at = excluded.last_message_at, cursor = excluded.cursor,
   last_success_at = excluded.last_success_at, failure_count = 0, last_error = NULL;`);
 
-  statements.push(REBUILD_FTS_SQL);
+  statements.push(SYNC_FTS_SQL);
 
   execD1File(statements.join("\n"), args.target, `Ingesting ${newMessages.length} new message(s)`);
   console.log("Done.");

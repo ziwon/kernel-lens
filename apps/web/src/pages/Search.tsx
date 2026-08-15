@@ -138,8 +138,8 @@ export default function Search() {
                   </h2>
                   <p
                     className="snippet mt-1.5 max-w-[76ch] text-small text-ink-secondary"
-                    // Snippets come from FTS5 snippet() and only ever contain
-                    // <mark>/</mark> around matched terms — no user HTML.
+                    // The API HTML-escapes the canonical body preview before
+                    // returning it. No source-provided HTML reaches this sink.
                     dangerouslySetInnerHTML={{ __html: r.snippet }}
                   />
                   <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-meta text-ink-muted">
