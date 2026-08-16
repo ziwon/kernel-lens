@@ -100,6 +100,24 @@ describe("weekly evidence-linked blog posts", () => {
     expect(prompt).toContain("Do not summarize a series patch by patch");
   });
 
+  it("uses topic and vendor metadata to prioritize AI infrastructure focus areas", () => {
+    const prompt = buildBlogPrompt("2026-W31", [
+      candidate({
+        topicNames: ["eBPF core"],
+        vendors: ["NVIDIA"],
+        affectedLayers: ["Kernel BPF core / verifier"],
+      }),
+      candidate({ sourceId: "s2", threadId: 2 }),
+    ], "en");
+    expect(BLOG_PROMPT_VERSION).toBe("kernel-lens-weekly-v3");
+    expect(prompt).toContain("Treat topicNames as technical-domain signals and vendors as implementation or product-impact signals");
+    expect(prompt).toContain("GPU and accelerator infrastructure");
+    expect(prompt).toContain("eBPF and observability");
+    expect(prompt).toContain("use a watchItem as a domain radar checkpoint");
+    expect(prompt).toContain('"topicNames":["eBPF core"]');
+    expect(prompt).toContain('"vendors":["NVIDIA"]');
+  });
+
   it("returns provider usage with validated content", async () => {
     const result = await generateWeeklyBlogPost(
       { model: "test-model", generateJson: async () => ({ data: valid, inputTokens: 21, outputTokens: 34 }) },
