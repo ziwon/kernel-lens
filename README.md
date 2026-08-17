@@ -28,9 +28,9 @@ archive; Kernel Lens is a discovery and interpretation layer on top of it.
 Version 0.3 development release. Topic and vendor curation, deterministic
 product-impact mapping, patch revision intelligence, explicit review evidence,
 integration-path records, search, evidence-linked AI summaries, and
-daily/weekly digests are implemented. A weekly analysis pipeline can turn the
-strongest digest evidence into a private AI-assisted article draft for human
-publication.
+daily/weekly digests are implemented. The analysis pipeline can turn either the
+strongest weekly digest evidence or one review-rich patch series into a private
+AI-assisted article draft for human publication.
 
 ## Repository layout
 
@@ -73,6 +73,15 @@ a configurable daily request budget, and processes at most five pending/stale
 threads per hourly run. The blog Worker reads only a published weekly digest,
 uses either Gemini (`google-gemini`) or Grok (`xai-grok`), and writes no more
 than one private draft for each ISO week.
+
+Single-topic Patch Briefings are generated explicitly from an indexed thread.
+They retain message-level citations, an evidence cutoff, and the patch series
+identifier without inventing a synthetic weekly digest:
+
+```bash
+pnpm blog:briefing:remote -- --thread 9133 --slug nvidia-rust-fwctl-nova-vgpu
+pnpm blog:preview:remote -- --slug nvidia-rust-fwctl-nova-vgpu
+```
 
 Set `BLOG_AI_PROVIDER`, `BLOG_AI_MODEL`, and `BLOG_LANGUAGE` in
 `workers/blog/wrangler.jsonc`, then install the matching paid API key as a
