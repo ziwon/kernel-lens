@@ -87,8 +87,13 @@ function main(): void {
   console.log(renderParagraph(content.lead.text, content.lead.sourceIds));
   for (const section of content.sections) {
     console.log(`\n## ${section.heading}\n`);
-    for (const paragraph of section.paragraphs) {
+    for (const [index, paragraph] of section.paragraphs.entries()) {
       console.log(`${renderParagraph(paragraph.text, paragraph.sourceIds)}\n`);
+      for (const block of section.codeBlocks?.filter((item) => item.afterParagraph === index + 1) ?? []) {
+        console.log(`_${block.caption}_\n`);
+        console.log(`\`\`\`${block.language}\n${block.code}\n\`\`\``);
+        console.log(`${block.sources.map((source) => `[${source.sourceId}] ${source.label}`).join(" · ")}\n`);
+      }
     }
   }
   console.log("\n## What to watch\n");

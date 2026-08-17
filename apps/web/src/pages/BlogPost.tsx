@@ -1,5 +1,6 @@
 import type { BlogPostParagraph, BlogPostSource } from "@lkmlens/shared";
 import { Link, useParams } from "react-router";
+import { EvidenceCodeBlock } from "../components/EvidenceCodeBlock.tsx";
 import { SectionMarker } from "../components/SectionMarker.tsx";
 import { SourceLink } from "../components/SourceLink.tsx";
 import { ErrorState, SkeletonRows } from "../components/States.tsx";
@@ -39,6 +40,7 @@ export default function BlogPost() {
   const citedIds = new Set([
     ...post.content.lead.sourceIds,
     ...post.content.sections.flatMap((section) => section.paragraphs.flatMap((paragraph) => paragraph.sourceIds)),
+    ...post.content.sections.flatMap((section) => section.codeBlocks?.flatMap((block) => block.sources.map((source) => source.sourceId)) ?? []),
     ...post.content.watchItems.flatMap((item) => item.sourceIds),
   ]);
   return (
@@ -72,7 +74,20 @@ export default function BlogPost() {
         <section key={section.heading} className="mt-12">
           <h2 className="border-t border-border-strong pt-5 text-h2 text-ink">{section.heading}</h2>
           <div className="mt-5 space-y-6">
-            {section.paragraphs.map((paragraph, index) => <EvidenceParagraph key={index} paragraph={paragraph} sources={sources} />)}
+            {section.paragraphs.map((paragraph, index) => (
+              <div key={index} className="space-y-6">
+                <EvidenceParagraph paragraph={paragraph} sources={sources} />
+                {section.codeBlocks
+                  ?.filter((block) => block.afterParagraph === index + 1)
+                  .map((block) => (
+                    <EvidenceCodeBlock
+                      key={`${block.language}-${block.afterParagraph}-${block.caption}`}
+                      block={block}
+                      sources={sources}
+                    />
+                  ))}
+              </div>
+            ))}
           </div>
         </section>
       ))}

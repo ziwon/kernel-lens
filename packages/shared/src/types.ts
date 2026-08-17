@@ -286,9 +286,27 @@ export interface BlogPostParagraph {
   sourceIds: string[];
 }
 
+export type BlogPostCodeLanguage = "c" | "rust" | "text";
+
+export interface BlogPostCodeSource {
+  sourceId: string;
+  label: string;
+}
+
+/** Editor-supplied explanatory code linked back to canonical article evidence. */
+export interface BlogPostCodeBlock {
+  language: BlogPostCodeLanguage;
+  caption: string;
+  code: string;
+  sources: BlogPostCodeSource[];
+  /** One-based paragraph position after which this block is rendered. */
+  afterParagraph: number;
+}
+
 export interface BlogPostSection {
   heading: string;
   paragraphs: BlogPostParagraph[];
+  codeBlocks?: BlogPostCodeBlock[];
 }
 
 export interface BlogPostContent {
