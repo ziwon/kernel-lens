@@ -278,6 +278,7 @@ export interface Digest {
 
 export type BlogPostStatus = "draft" | "published" | "archived";
 export type BlogPostLanguage = "en" | "ko";
+export type BlogPostType = "weekly" | "briefing";
 
 /** One evidence-linked unit of prose in a generated weekly article. */
 export interface BlogPostParagraph {
@@ -300,19 +301,27 @@ export interface BlogPostContent {
 /** Canonical sources are supplied by the application, never invented by AI. */
 export interface BlogPostSource {
   sourceId: string;
-  threadId: number;
+  /** Kernel Lens thread when the source was ingested; null for external primary records. */
+  threadId: number | null;
+  messageId?: string;
   subject: string;
   sourceUrl: string;
   evidenceUrls: string[];
+  authorName?: string | null;
+  postedAt?: string | null;
 }
 
 export interface BlogPostListItem {
   id: number;
-  periodKey: string;
+  postType: BlogPostType;
+  periodKey: string | null;
   slug: string;
   language: BlogPostLanguage;
   title: string;
   dek: string;
+  seriesId: number | null;
+  evidenceCutoff: string | null;
+  lastVerifiedAt: string | null;
   sourceThreadIds: number[];
   publishedAt: string | null;
 }
@@ -320,7 +329,7 @@ export interface BlogPostListItem {
 export interface BlogPost extends BlogPostListItem {
   content: BlogPostContent;
   sources: BlogPostSource[];
-  sourceDigestId: number;
+  sourceDigestId: number | null;
   provider: string;
   model: string;
   promptVersion: string;

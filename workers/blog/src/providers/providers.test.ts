@@ -27,14 +27,20 @@ describe("weekly blog providers", () => {
       const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
       expect(body.store).toBe(false);
       expect(body.reasoning).toEqual({ effort: "high" });
-      expect(body.text).toMatchObject({ format: { type: "json_schema", strict: true } });
+      expect(body.prompt_cache_key).toBe("kernel-lens-briefing-v1");
+      expect(body.text).toMatchObject({
+        format: { type: "json_schema", strict: true, name: "kernel_lens_patch_briefing" },
+      });
       return Response.json({
         output: [{ type: "message", content: [{ type: "output_text", text: '{"title":"Weekly"}' }] }],
         usage: { input_tokens: 70, output_tokens: 25 },
       });
     });
     vi.stubGlobal("fetch", fetchMock);
-    const result = await createGrokBlogProvider("grok-secret", "grok-test").generateJson("prompt");
+    const result = await createGrokBlogProvider("grok-secret", "grok-test").generateJson("prompt", {
+      promptVersion: "kernel-lens-briefing-v1",
+      schemaName: "kernel_lens_patch_briefing",
+    });
     expect(result).toEqual({ data: { title: "Weekly" }, inputTokens: 70, outputTokens: 25 });
     expect(fetchMock.mock.calls[0]?.[1]?.headers).toMatchObject({ authorization: "Bearer grok-secret" });
   });

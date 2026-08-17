@@ -35,7 +35,7 @@ export function createGeminiBlogProvider(apiKey: string, model: string): BlogPro
         const body = (await response.text()).slice(0, 1_000);
         throw new BlogApiError(`Gemini API ${response.status}: ${body}`, response.status, response.status === 429);
       }
-      const result = await response.json<GeminiResponse>();
+      const result = await response.json() as GeminiResponse;
       const text = result.candidates?.[0]?.content?.parts?.map((part) => part.text ?? "").join("");
       if (!text) throw new BlogApiError("Gemini API returned no text candidate", 502, false);
       try {

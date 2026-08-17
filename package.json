@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "pnpm --filter @lkmlens/web dev",
     "build": "pnpm --filter @lkmlens/web build",
-    "typecheck": "pnpm -r --if-present typecheck && tsc -p functions/tsconfig.json",
+    "typecheck": "pnpm -r --if-present typecheck && tsc -p functions/tsconfig.json && tsc -p scripts/tsconfig.json",
     "lint": "pnpm -r --if-present lint",
     "test": "vitest run",
     "db:migrate:local": "wrangler d1 migrations apply lkmlens --local",
@@ -27,6 +27,8 @@
     "blog:preview:remote": "tsx scripts/manage-blog-post.ts preview --remote",
     "blog:publish:local": "tsx scripts/manage-blog-post.ts publish --local",
     "blog:publish:remote": "tsx scripts/manage-blog-post.ts publish --remote",
+    "blog:briefing:local": "tsx scripts/generate-blog-briefing.ts --local",
+    "blog:briefing:remote": "tsx scripts/generate-blog-briefing.ts --remote",
     "workers:typecheck": "pnpm --filter @lkmlens/summarizer typecheck && pnpm --filter @lkmlens/digest typecheck && pnpm --filter @lkmlens/blog typecheck",
     "pages:deploy": "pnpm --filter @lkmlens/web build && wrangler pages deploy apps/web/dist --project-name=lkmlens"
   },

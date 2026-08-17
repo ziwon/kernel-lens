@@ -81,6 +81,7 @@ export async function generateLatestBlogDraft(env: Env): Promise<{ status: strin
       ...generated.content.watchItems.flatMap((item) => item.sourceIds),
     ]);
     const saved = await saveBlogDraft(env.DB, {
+      postType: "weekly",
       periodKey: digest.periodKey,
       slug: slugFor(digest.periodKey),
       language,

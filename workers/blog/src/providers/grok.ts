@@ -17,7 +17,7 @@ interface GrokResponse {
 export function createGrokBlogProvider(apiKey: string, model: string): BlogProvider {
   return {
     model,
-    async generateJson(prompt): Promise<ProviderGeneration> {
+    async generateJson(prompt, options): Promise<ProviderGeneration> {
       const response = await fetch("https://api.x.ai/v1/responses", {
         method: "POST",
         headers: {
@@ -30,11 +30,11 @@ export function createGrokBlogProvider(apiKey: string, model: string): BlogProvi
           store: false,
           reasoning: { effort: "high" },
           max_output_tokens: 8_192,
-          prompt_cache_key: BLOG_PROMPT_VERSION,
+          prompt_cache_key: options?.promptVersion ?? BLOG_PROMPT_VERSION,
           text: {
             format: {
               type: "json_schema",
-              name: "kernel_lens_weekly",
+              name: options?.schemaName ?? "kernel_lens_weekly",
               schema: BLOG_POST_SCHEMA,
               strict: true,
             },
@@ -46,7 +46,7 @@ export function createGrokBlogProvider(apiKey: string, model: string): BlogProvi
         const body = (await response.text()).slice(0, 1_000);
         throw new BlogApiError(`xAI API ${response.status}: ${body}`, response.status, response.status === 429);
       }
-      const result = await response.json<GrokResponse>();
+      const result = await response.json() as GrokResponse;
       const text = result.output
         ?.filter((item) => item.type === "message")
         .flatMap((item) => item.content ?? [])

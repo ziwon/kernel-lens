@@ -6,20 +6,25 @@ import type {
   BlogPostListItem,
   BlogPostSource,
   BlogPostStatus,
+  BlogPostType,
   Digest,
   DigestContent,
 } from "@lkmlens/shared";
 
 interface BlogPostRow {
   id: number;
-  period_key: string;
+  post_type: BlogPostType;
+  period_key: string | null;
   slug: string;
   language: BlogPostLanguage;
   title: string;
   dek: string;
   content_json: string;
   sources_json: string;
-  source_digest_id: number;
+  source_digest_id: number | null;
+  series_id: number | null;
+  evidence_cutoff: string | null;
+  last_verified_at: string | null;
   source_thread_ids_json: string;
   provider: string;
   model: string;
@@ -35,11 +40,15 @@ interface BlogPostRow {
 function rowToListItem(row: BlogPostRow): BlogPostListItem {
   return {
     id: row.id,
+    postType: row.post_type,
     periodKey: row.period_key,
     slug: row.slug,
     language: row.language,
     title: row.title,
     dek: row.dek,
+    seriesId: row.series_id,
+    evidenceCutoff: row.evidence_cutoff,
+    lastVerifiedAt: row.last_verified_at,
     sourceThreadIds: JSON.parse(row.source_thread_ids_json) as number[],
     publishedAt: row.published_at,
   };
@@ -62,9 +71,10 @@ function rowToBlogPost(row: BlogPostRow): BlogPost {
   };
 }
 
-const BLOG_POST_COLUMNS = `id, period_key, slug, language, title, dek, content_json, sources_json,
-  source_digest_id, source_thread_ids_json, provider, model, prompt_version, input_tokens,
-  output_tokens, status, generated_at, published_at, updated_at`;
+const BLOG_POST_COLUMNS = `id, post_type, period_key, slug, language, title, dek, content_json,
+  sources_json, source_digest_id, series_id, evidence_cutoff, last_verified_at,
+  source_thread_ids_json, provider, model, prompt_version, input_tokens, output_tokens,
+  status, generated_at, published_at, updated_at`;
 
 export interface BlogCandidateDetailRow {
   threadId: number;
@@ -124,7 +134,8 @@ export async function getBlogPostByPeriodKey(
   periodKey: string,
 ): Promise<BlogPost | null> {
   const row = await db.prepare(
-    `SELECT ${BLOG_POST_COLUMNS} FROM blog_posts WHERE period_key = ?`,
+    `SELECT ${BLOG_POST_COLUMNS} FROM blog_posts
+     WHERE post_type = 'weekly' AND period_key = ?`,
   ).bind(periodKey).first<BlogPostRow>();
   return row ? rowToBlogPost(row) : null;
 }
@@ -140,7 +151,9 @@ export async function getNextWeeklyDigestForBlog(db: D1Database): Promise<Digest
             generated_at, published_at
      FROM digests
      WHERE period_type = 'weekly' AND published_at IS NOT NULL
-       AND period_key > COALESCE((SELECT MAX(period_key) FROM blog_posts), '')
+       AND period_key > COALESCE((
+         SELECT MAX(period_key) FROM blog_posts WHERE post_type = 'weekly'
+       ), '')
      ORDER BY period_key ASC LIMIT 1`,
   ).first<{
     id: number;
@@ -168,13 +181,17 @@ export async function getNextWeeklyDigestForBlog(db: D1Database): Promise<Digest
 export async function saveBlogDraft(
   db: D1Database,
   input: {
-    periodKey: string;
+    postType: BlogPostType;
+    periodKey: string | null;
     slug: string;
     language: BlogPostLanguage;
     title: string;
     content: BlogPostContent;
     sources: BlogPostSource[];
-    sourceDigestId: number;
+    sourceDigestId: number | null;
+    seriesId?: number | null;
+    evidenceCutoff?: string | null;
+    lastVerifiedAt?: string | null;
     provider: string;
     model: string;
     promptVersion: string;
@@ -183,8 +200,18 @@ export async function saveBlogDraft(
     replaceExisting?: boolean;
   },
 ): Promise<boolean> {
+  if (input.postType === "weekly" && (!input.periodKey || input.sourceDigestId === null)) {
+    throw new Error("Weekly blog drafts require a period key and source digest");
+  }
+  if (input.postType === "briefing"
+    && (input.periodKey !== null || input.sourceDigestId !== null
+      || !input.evidenceCutoff || !input.lastVerifiedAt)) {
+    throw new Error("Patch Briefings require evidence timestamps and no weekly digest fields");
+  }
   const conflictClause = input.replaceExisting
     ? `DO UPDATE SET
+         post_type = excluded.post_type,
+         period_key = excluded.period_key,
          slug = excluded.slug,
          language = excluded.language,
          title = excluded.title,
@@ -192,6 +219,9 @@ export async function saveBlogDraft(
          content_json = excluded.content_json,
          sources_json = excluded.sources_json,
          source_digest_id = excluded.source_digest_id,
+         series_id = excluded.series_id,
+         evidence_cutoff = excluded.evidence_cutoff,
+         last_verified_at = excluded.last_verified_at,
          source_thread_ids_json = excluded.source_thread_ids_json,
          provider = excluded.provider,
          model = excluded.model,
@@ -202,14 +232,19 @@ export async function saveBlogDraft(
          generated_at = CURRENT_TIMESTAMP,
          published_at = NULL`
     : "DO NOTHING";
+  const conflictTarget = input.postType === "weekly" ? "period_key" : "slug";
+  const sourceThreadIds = Array.from(new Set(input.sources.flatMap((source) =>
+    source.threadId === null ? [] : [source.threadId])));
   const result = await db.prepare(
     `INSERT INTO blog_posts (
-       period_key, slug, language, title, dek, content_json, sources_json,
-       source_digest_id, source_thread_ids_json, provider, model, prompt_version,
+       post_type, period_key, slug, language, title, dek, content_json, sources_json,
+       source_digest_id, series_id, evidence_cutoff, last_verified_at,
+       source_thread_ids_json, provider, model, prompt_version,
        input_tokens, output_tokens, status
-     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft')
-     ON CONFLICT(period_key) ${conflictClause}`,
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft')
+     ON CONFLICT(${conflictTarget}) ${conflictClause}`,
   ).bind(
+    input.postType,
     input.periodKey,
     input.slug,
     input.language,
@@ -218,7 +253,10 @@ export async function saveBlogDraft(
     JSON.stringify(input.content),
     JSON.stringify(input.sources),
     input.sourceDigestId,
-    JSON.stringify(input.sources.map((source) => source.threadId)),
+    input.seriesId ?? null,
+    input.evidenceCutoff ?? null,
+    input.lastVerifiedAt ?? null,
+    JSON.stringify(sourceThreadIds),
     input.provider,
     input.model,
     input.promptVersion,

@@ -31,7 +31,10 @@ export interface BlogCandidate {
 
 export interface BlogProvider {
   model: string;
-  generateJson(prompt: string): Promise<ProviderGeneration>;
+  generateJson(
+    prompt: string,
+    options?: { promptVersion: string; schemaName: string },
+  ): Promise<ProviderGeneration>;
 }
 
 export interface GeneratedBlogPost {
@@ -314,7 +317,10 @@ export async function generateWeeklyBlogPost(
   language: BlogPostLanguage,
 ): Promise<GeneratedBlogPost> {
   if (candidates.length < 2) throw new Error("At least two evidence-linked candidates are required");
-  const generated = await provider.generateJson(buildBlogPrompt(periodKey, candidates, language));
+  const generated = await provider.generateJson(
+    buildBlogPrompt(periodKey, candidates, language),
+    { promptVersion: BLOG_PROMPT_VERSION, schemaName: "kernel_lens_weekly" },
+  );
   const allowedSourceIds = new Set(candidates.map((candidate) => candidate.sourceId));
   const { title, content } = validateBlogPostContent(generated.data, allowedSourceIds);
   return {
