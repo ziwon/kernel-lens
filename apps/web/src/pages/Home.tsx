@@ -1,10 +1,11 @@
 import { Link } from "react-router";
+import { AnalysisPostRow } from "../components/AnalysisPostRow.tsx";
 import { SearchBox } from "../components/SearchBox.tsx";
 import { SectionMarker } from "../components/SectionMarker.tsx";
 import { SectionHeading } from "../components/SectionHeading.tsx";
 import { ChannelGrid } from "../components/ChannelGrid.tsx";
 import { EmptyState, ErrorState, LoadingNote } from "../components/States.tsx";
-import { fetchCurationChannels, fetchDigests } from "../lib/api.ts";
+import { fetchBlogPosts, fetchCurationChannels, fetchDigests } from "../lib/api.ts";
 import { useAsync } from "../lib/useAsync.ts";
 import { formatDate, plural } from "../lib/format.ts";
 import { frame } from "../lib/frame.ts";
@@ -12,6 +13,7 @@ import { frame } from "../lib/frame.ts";
 export default function Home() {
   const channels = useAsync(fetchCurationChannels, []);
   const digests = useAsync(fetchDigests, []);
+  const analysis = useAsync(fetchBlogPosts, []);
 
   const allTopics = channels.status === "success"
     ? channels.data.filter((channel) => channel.kind === "topic")
@@ -22,9 +24,12 @@ export default function Home() {
   const visibleTopics = allTopics.filter((channel) => channel.patchCount > 0).slice(0, 8);
   const visibleVendors = allVendors.slice(0, 8);
   const observedPatches = allTopics.reduce((total, channel) => total + channel.patchCount, 0);
+  const publishedReports = analysis.status === "success" && digests.status === "success"
+    ? analysis.data.length + digests.data.length
+    : "—";
 
   // Section markers must stay contiguous: the digests section is omitted until
-  // an edition exists, so numbering is counted at render rather than hardcoded.
+  // an edition exists, while Analysis always renders its loading or empty state.
   const hasDigests = digests.status === "success" && digests.data.length > 0;
   const sectionIndex = (position: number) => String(position).padStart(2, "0");
 
@@ -79,19 +84,46 @@ export default function Home() {
             <CoverageCell label="Topics tracked" value={allTopics.length} />
             <CoverageCell label="Vendor lenses" value={allVendors.length} />
             <CoverageCell label="Observed patches" value={observedPatches} />
-            <CoverageCell
-              label="Digests published"
-              value={digests.status === "success" ? digests.data.length : "—"}
-            />
+            <CoverageCell label="Published reports" value={publishedReports} />
           </dl>
         </section>
       )}
 
-      {/* 02 — topics. */}
+      {/* 02 — latest evidence-linked analysis. */}
+      <section className={`${frame} pt-16`} aria-labelledby="analysis-heading">
+        <SectionHeading
+          id="analysis-heading"
+          index="02"
+          marker="Analysis"
+          title="Latest engineering analysis"
+          description="Weekly synthesis and single-topic Patch Briefings connect observed kernel changes to infrastructure, validation, and product work."
+          action={{ to: "/blog", label: "View all" }}
+        />
+        <div className="mt-2">
+          {analysis.status === "loading" && <LoadingNote>Loading published analysis…</LoadingNote>}
+          {analysis.status === "error" && (
+            <ErrorState title="Could not load analysis." detail={analysis.error.message} />
+          )}
+          {analysis.status === "success" && analysis.data.length === 0 && (
+            <EmptyState title="No analysis has been published yet.">
+              Editor-reviewed articles appear here after publication.
+            </EmptyState>
+          )}
+          {analysis.status === "success" && analysis.data.length > 0 && (
+            <ul className="border-t border-border">
+              {analysis.data.slice(0, 2).map((post) => (
+                <AnalysisPostRow key={post.id} post={post} />
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+
+      {/* 03 — topics. */}
       <section className={`${frame} pt-16`} aria-labelledby="topics-heading">
         <SectionHeading
           id="topics-heading"
-          index="02"
+          index="03"
           marker="Topics"
           title="Kernel areas under observation"
           description="Start with a subsystem or cross-cutting area, then follow its product impact."
@@ -112,11 +144,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 03 — vendors. */}
+      {/* 04 — vendors. */}
       <section className={`${frame} pt-16`} aria-labelledby="vendors-heading">
         <SectionHeading
           id="vendors-heading"
-          index="03"
+          index="04"
           marker="Vendors"
           title="Public changes mapped to hardware"
           description="Explainable watchlist rules connect changed paths and subsystems to platforms."
@@ -134,12 +166,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 04 — recent digests, when an edition exists. */}
+      {/* 05 — recent digests, when an edition exists. */}
       {hasDigests && digests.status === "success" && (
         <section className={`${frame} pt-16`} aria-labelledby="digests-heading">
           <SectionHeading
             id="digests-heading"
-            index={sectionIndex(4)}
+            index={sectionIndex(5)}
             marker="Digests"
             title="Recent editions"
             description="Daily and weekly reports of selected threads, each linked to public evidence."
@@ -173,11 +205,11 @@ export default function Home() {
         </section>
       )}
 
-      {/* 05 — how to read what is shown here. */}
+      {/* 06 — how to read what is shown here. */}
       <section className={`${frame} pt-16`} aria-labelledby="methodology-heading">
         <SectionHeading
           id="methodology-heading"
-          index={sectionIndex(hasDigests ? 5 : 4)}
+          index={sectionIndex(hasDigests ? 6 : 5)}
           marker="Methodology"
           title="How to read the evidence"
           description="Kernel Lens reports what is publicly observable and says so when it is not."
