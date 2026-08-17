@@ -32,9 +32,9 @@ export const onRequestGet: PagesFunction<Env> = async ({ env, request }) => {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Kernel Lens Weekly Analysis</title>
+    <title>Kernel Lens Analysis</title>
     <link>${escapeXml(`${origin}/blog`)}</link>
-    <description>Evidence-linked weekly analysis of Linux kernel changes and their product consequences.</description>
+    <description>Evidence-linked weekly watchlists and Patch Briefings about Linux kernel changes and their product consequences.</description>
     <language>en</language>
     <lastBuildDate>${escapeXml(rssDate(posts[0]?.publishedAt ?? null))}</lastBuildDate>
     <atom:link href="${escapeXml(selfUrl)}" rel="self" type="application/rss+xml" />${items}
