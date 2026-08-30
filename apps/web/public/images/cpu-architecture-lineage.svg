@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 900" role="img" aria-labelledby="title desc">
+  <title id="title">Genealogy of modern CPU architectures</title>
+  <desc id="desc">A timeline showing the x86 compatibility line, IBM 801 to POWER and PowerPC, Berkeley RISC to SPARC, Stanford MIPS, Acorn ARM1 to AArch64, and the later RISC-V project influenced by the Berkeley tradition.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/>
+    </marker>
+    <style>
+      .bg { fill: #f7f5f1; }
+      .grid { stroke: #d8d3ca; stroke-width: 1; }
+      .axis { stroke: #8d877e; stroke-width: 2; }
+      .axis-label { fill: #6e675f; font: 600 16px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .04em; }
+      .title { fill: #171512; font: 700 34px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .subtitle { fill: #625d56; font: 18px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .lane { fill: #6e675f; font: 700 15px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .08em; }
+      .box { fill: #fffefa; stroke-width: 2; rx: 10; }
+      .box-title { fill: #171512; font: 700 19px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .box-note { fill: #6e675f; font: 14px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .x86 { stroke: #a43f2b; }
+      .ibm { stroke: #2f668c; }
+      .berkeley { stroke: #7b5d9a; }
+      .stanford { stroke: #a16a1e; }
+      .arm { stroke: #25786f; }
+      .riscv { stroke: #4d7040; }
+      .direct { fill: none; stroke-width: 3; marker-end: url(#arrow); }
+      .influence { fill: none; stroke-width: 2.5; stroke-dasharray: 9 8; marker-end: url(#arrow); }
+      .legend { fill: #625d56; font: 14px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .callout { fill: #eee9df; stroke: #c9c2b7; stroke-width: 1; rx: 8; }
+      .callout-text { fill: #514b44; font: 14px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1280" height="900"/>
+  <text class="title" x="64" y="62">A genealogy of modern CPU architectures</text>
+  <text class="subtitle" x="64" y="94">Direct product lines, parallel RISC projects, and documented design influence</text>
+
+  <line class="axis" x1="150" y1="132" x2="1218" y2="132"/>
+  <g>
+    <line class="grid" x1="170" y1="124" x2="170" y2="836"/>
+    <text class="axis-label" x="170" y="118" text-anchor="middle">1978</text>
+    <line class="grid" x1="330" y1="124" x2="330" y2="836"/>
+    <text class="axis-label" x="330" y="118" text-anchor="middle">1981</text>
+    <line class="grid" x1="500" y1="124" x2="500" y2="836"/>
+    <text class="axis-label" x="500" y="118" text-anchor="middle">1985</text>
+    <line class="grid" x1="690" y1="124" x2="690" y2="836"/>
+    <text class="axis-label" x="690" y="118" text-anchor="middle">1990</text>
+    <line class="grid" x1="875" y1="124" x2="875" y2="836"/>
+    <text class="axis-label" x="875" y="118" text-anchor="middle">2003</text>
+    <line class="grid" x1="1050" y1="124" x2="1050" y2="836"/>
+    <text class="axis-label" x="1050" y="118" text-anchor="middle">2010</text>
+    <line class="grid" x1="1210" y1="124" x2="1210" y2="836"/>
+    <text class="axis-label" x="1210" y="118" text-anchor="middle">TODAY</text>
+  </g>
+
+  <text class="lane" x="52" y="205">x86</text>
+  <rect class="box x86" x="120" y="166" width="142" height="74"/>
+  <text class="box-title" x="191" y="196" text-anchor="middle">Intel 8086</text>
+  <text class="box-note" x="191" y="219" text-anchor="middle">16-bit · 1978</text>
+
+  <rect class="box x86" x="440" y="166" width="142" height="74"/>
+  <text class="box-title" x="511" y="196" text-anchor="middle">IA-32</text>
+  <text class="box-note" x="511" y="219" text-anchor="middle">32-bit evolution</text>
+
+  <rect class="box x86" x="820" y="166" width="170" height="74"/>
+  <text class="box-title" x="905" y="196" text-anchor="middle">AMD64 / x86-64</text>
+  <text class="box-note" x="905" y="219" text-anchor="middle">64-bit · 2003</text>
+
+  <line class="direct x86" x1="262" y1="203" x2="438" y2="203"/>
+  <line class="direct x86" x1="582" y1="203" x2="818" y2="203"/>
+  <text class="box-note" x="690" y="190" text-anchor="middle">compatibility preserved</text>
+
+  <text class="lane" x="52" y="344">IBM</text>
+  <rect class="box ibm" x="260" y="305" width="142" height="74"/>
+  <text class="box-title" x="331" y="335" text-anchor="middle">IBM 801</text>
+  <text class="box-note" x="331" y="358" text-anchor="middle">prototype · 1980</text>
+
+  <rect class="box ibm" x="620" y="305" width="142" height="74"/>
+  <text class="box-title" x="691" y="335" text-anchor="middle">POWER</text>
+  <text class="box-note" x="691" y="358" text-anchor="middle">RS/6000 · 1990</text>
+
+  <rect class="box ibm" x="820" y="305" width="170" height="74"/>
+  <text class="box-title" x="905" y="335" text-anchor="middle">PowerPC</text>
+  <text class="box-note" x="905" y="358" text-anchor="middle">AIM alliance · 1993</text>
+
+  <rect class="box ibm" x="1080" y="305" width="142" height="74"/>
+  <text class="box-title" x="1151" y="335" text-anchor="middle">Power ISA</text>
+  <text class="box-note" x="1151" y="358" text-anchor="middle">servers + systems</text>
+
+  <line class="direct ibm" x1="402" y1="342" x2="618" y2="342"/>
+  <line class="direct ibm" x1="762" y1="342" x2="818" y2="342"/>
+  <line class="direct ibm" x1="990" y1="342" x2="1078" y2="342"/>
+
+  <text class="lane" x="52" y="483">BERKELEY</text>
+  <rect class="box berkeley" x="260" y="444" width="150" height="74"/>
+  <text class="box-title" x="335" y="474" text-anchor="middle">RISC I / II</text>
+  <text class="box-note" x="335" y="497" text-anchor="middle">UC Berkeley</text>
+
+  <rect class="box berkeley" x="475" y="444" width="142" height="74"/>
+  <text class="box-title" x="546" y="474" text-anchor="middle">SPARC</text>
+  <text class="box-note" x="546" y="497" text-anchor="middle">Sun · 1984</text>
+
+  <line class="direct berkeley" x1="410" y1="481" x2="473" y2="481"/>
+
+  <rect class="box riscv" x="1000" y="444" width="172" height="74"/>
+  <text class="box-title" x="1086" y="474" text-anchor="middle">RISC-V</text>
+  <text class="box-note" x="1086" y="497" text-anchor="middle">open ISA · 2010</text>
+
+  <path class="influence riscv" d="M 410 500 C 650 565, 820 565, 998 500"/>
+  <text class="box-note" x="735" y="557" text-anchor="middle">Berkeley tradition · clean-slate ISA, not binary compatibility</text>
+
+  <text class="lane" x="52" y="641">STANFORD</text>
+  <rect class="box stanford" x="260" y="602" width="150" height="74"/>
+  <text class="box-title" x="335" y="632" text-anchor="middle">MIPS project</text>
+  <text class="box-note" x="335" y="655" text-anchor="middle">Stanford · 1981</text>
+
+  <rect class="box stanford" x="475" y="602" width="180" height="74"/>
+  <text class="box-title" x="565" y="632" text-anchor="middle">MIPS systems</text>
+  <text class="box-note" x="565" y="655" text-anchor="middle">commercialized · 1984</text>
+
+  <line class="direct stanford" x1="410" y1="639" x2="473" y2="639"/>
+
+  <text class="lane" x="52" y="780">ACORN / ARM</text>
+  <rect class="box arm" x="440" y="741" width="142" height="74"/>
+  <text class="box-title" x="511" y="771" text-anchor="middle">ARM1</text>
+  <text class="box-note" x="511" y="794" text-anchor="middle">Acorn · 1985</text>
+
+  <rect class="box arm" x="650" y="741" width="180" height="74"/>
+  <text class="box-title" x="740" y="771" text-anchor="middle">Arm company</text>
+  <text class="box-note" x="740" y="794" text-anchor="middle">founded · 1990</text>
+
+  <rect class="box arm" x="1010" y="741" width="172" height="74"/>
+  <text class="box-title" x="1096" y="771" text-anchor="middle">AArch64</text>
+  <text class="box-note" x="1096" y="794" text-anchor="middle">64-bit ecosystem</text>
+
+  <line class="direct arm" x1="582" y1="778" x2="648" y2="778"/>
+  <line class="direct arm" x1="830" y1="778" x2="1008" y2="778"/>
+
+  <rect class="callout" x="690" y="594" width="470" height="98"/>
+  <text class="callout-text" x="714" y="622">
+    <tspan x="714" dy="0">RISC was several overlapping projects, not one trunk.</tspan>
+    <tspan x="714" dy="23">Similar principles do not imply compatible binaries,</tspan>
+    <tspan x="714" dy="23">shared source code, or a direct corporate lineage.</tspan>
+  </text>
+
+  <g transform="translate(64 858)">
+    <line class="direct ibm" x1="0" y1="0" x2="54" y2="0"/>
+    <text class="legend" x="68" y="5">direct architecture or product line</text>
+    <line class="influence riscv" x1="360" y1="0" x2="414" y2="0"/>
+    <text class="legend" x="428" y="5">documented intellectual influence</text>
+  </g>
+</svg>
