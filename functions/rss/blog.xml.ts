@@ -1,4 +1,5 @@
 import { listPublishedBlogPosts } from "@lkmlens/db";
+import { EDITORIAL_POSTS } from "@lkmlens/shared";
 
 interface Env {
   DB: D1Database;
@@ -17,7 +18,10 @@ function rssDate(value: string | null): string {
 export const onRequestGet: PagesFunction<Env> = async ({ env, request }) => {
   const origin = new URL(request.url).origin;
   const selfUrl = `${origin}/rss/blog.xml`;
-  const posts = await listPublishedBlogPosts(env.DB, 30);
+  const generatedPosts = await listPublishedBlogPosts(env.DB, 30);
+  const posts = [...EDITORIAL_POSTS, ...generatedPosts]
+    .sort((left, right) => (right.publishedAt ?? "").localeCompare(left.publishedAt ?? ""))
+    .slice(0, 30);
   const items = posts.map((post) => {
     const url = `${origin}/blog/${post.slug}`;
     return `
@@ -34,7 +38,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ env, request }) => {
   <channel>
     <title>Kernel Lens Analysis</title>
     <link>${escapeXml(`${origin}/blog`)}</link>
-    <description>Evidence-linked weekly watchlists and Patch Briefings about Linux kernel changes and their product consequences.</description>
+    <description>Evergreen architecture primers and evidence-linked Linux kernel analysis.</description>
     <language>en</language>
     <lastBuildDate>${escapeXml(rssDate(posts[0]?.publishedAt ?? null))}</lastBuildDate>
     <atom:link href="${escapeXml(selfUrl)}" rel="self" type="application/rss+xml" />${items}
