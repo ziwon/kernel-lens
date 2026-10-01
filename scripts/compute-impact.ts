@@ -15,6 +15,7 @@
 import { inferImpact, type ImpactRule } from "@lkmlens/impact";
 import { extractFilePaths } from "@lkmlens/thread-builder";
 import { execD1File, parseD1Target, queryD1, sqlString, type D1Target } from "./lib/d1.js";
+import { fetchThreadRoots } from "./lib/thread-roots.js";
 
 function fetchRules(target: D1Target): ImpactRule[] {
   const rows = queryD1<{
@@ -36,21 +37,6 @@ function fetchRules(target: D1Target): ImpactRule[] {
     stakeholders: JSON.parse(r.stakeholders_json) as string[],
     enabled: true,
   }));
-}
-
-interface ThreadRootRow {
-  thread_id: number;
-  subject: string;
-  body_text: string;
-}
-
-function fetchThreadRoots(target: D1Target): ThreadRootRow[] {
-  return queryD1<ThreadRootRow>(
-    `SELECT t.id AS thread_id, m.subject AS subject, m.body_text AS body_text
-     FROM threads t
-     JOIN messages m ON m.message_id = t.root_message_id`,
-    target,
-  );
 }
 
 function main() {
