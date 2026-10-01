@@ -61,13 +61,20 @@ export async function listCurationChannels(db: D1Database): Promise<CurationChan
        GROUP BY tp.id ORDER BY tp.display_order ASC, tp.name ASC`,
     ).all<ChannelRow>(),
     db.prepare(
-      `SELECT rules.vendor, vp.description, json_group_array(DISTINCT rules.layer) AS layers_json,
-              COUNT(DISTINCT ti.thread_id) AS patch_count
-       FROM (SELECT DISTINCT vendor, layer FROM impact_rules
-             WHERE enabled = 1 AND vendor IS NOT NULL) rules
+      `WITH vendor_counts AS (
+         SELECT vendors.value AS vendor, COUNT(DISTINCT ti.thread_id) AS patch_count
+         FROM thread_impact ti
+         JOIN json_each(COALESCE(ti.vendors_json, '[]')) vendors
+         GROUP BY vendors.value
+       ), rules AS (
+         SELECT DISTINCT vendor, layer FROM impact_rules
+         WHERE enabled = 1 AND vendor IS NOT NULL
+       )
+       SELECT rules.vendor, vp.description, json_group_array(DISTINCT rules.layer) AS layers_json,
+              COALESCE(vc.patch_count, 0) AS patch_count
+       FROM rules
        LEFT JOIN vendor_profiles vp ON vp.vendor = rules.vendor
-       LEFT JOIN thread_impact ti
-         ON EXISTS (SELECT 1 FROM json_each(ti.vendors_json) WHERE value = rules.vendor)
+       LEFT JOIN vendor_counts vc ON vc.vendor = rules.vendor
        GROUP BY rules.vendor ORDER BY rules.vendor ASC`,
     ).all<VendorChannelRow>(),
   ]);
